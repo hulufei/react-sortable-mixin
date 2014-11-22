@@ -1,4 +1,9 @@
-var React = require('react');
+jest.dontMock('../index');
+
+var React = require('react/addons');
+var TestUtils = React.addons.TestUtils;
+
+// Simple List component using mixin
 var sortable = require('../index');
 
 var Item = React.createClass({
@@ -23,4 +28,9 @@ var List = React.createClass({
   }
 });
 
-module.exports = List;
+describe('List', function() {
+    it('should render list', function() {
+      var list = TestUtils.renderIntoDocument(<List/>);
+      expect(list.getDOMNode().children.length).toBe(3);
+    });
+ });

@@ -1,0 +1,38 @@
+{
+  "name": "react-sortable-mixin",
+  "version": "0.0.0",
+  "description": "Make list like component sortable",
+  "main": "index.js",
+  "devDependencies": {
+    "jest-cli": "~0.1.18",
+    "react": "*",
+    "react-tools": "*"
+  },
+  "jest": {
+    "scriptPreprocessor": "<rootDir>/preprocessor.js",
+    "unmockedModulePathPatterns": [
+      "<rootDir>/node_modules/react"
+    ]
+  },
+  "scripts": {
+    "test": "./node_modules/jest-cli/bin/jest.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hulufei/react-sortable-mixin.git"
+  },
+  "keywords": [
+    "react",
+    "sortable",
+    "movable",
+    "list",
+    "mixin",
+    "drag",
+    "move"
+  ],
+  "author": "hulufei",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hulufei/react-sortable-mixin/issues"
+  }
+}
