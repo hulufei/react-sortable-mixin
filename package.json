@@ -1,0 +1,38 @@
+{
+  "name": "react-sortable-mixin",
+  "version": "0.0.0",
+  "description": "Make list like component sortable",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/karma/bin/karma start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hulufei/react-sortable-mixin.git"
+  },
+  "keywords": [
+    "react",
+    "sortable",
+    "movable",
+    "list",
+    "mixin",
+    "drag",
+    "move"
+  ],
+  "author": "hulufei",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hulufei/react-sortable-mixin/issues"
+  },
+  "devDependencies": {
+    "karma-chai-plugins": "~0.2.3",
+    "mocha": "~2.0.1",
+    "karma": "~0.12.25",
+    "karma-phantomjs-launcher": "~0.1.4",
+    "karma-mocha": "~0.1.9",
+    "webpack": "~1.4.13",
+    "webpack-dev-server": "~1.6.6",
+    "karma-webpack": "~1.3.1",
+    "jsx-loader": "~0.12.2"
+  }
+}

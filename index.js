@@ -1,4 +1,3 @@
-// TODO: usage doc
 var listMixin = {
   getInitialState: function() {
     return {items: this.props.list || []};
@@ -15,6 +14,7 @@ var listMixin = {
   // movedComponent: component to move
   // moveElemEvent: mouse event object triggered on moveElem
   bindMove: function(movedComponent, moveElemEvent) {
+    console.log('bind move');
     var moveElem = movedComponent.getDOMNode()
       , placeholder = movedComponent.placeholder
       , parentPosition = moveElem.parentElement.getBoundingClientRect()
@@ -147,6 +147,7 @@ var itemMixin = {
     this.placeholder.style.opacity = '0';
   },
   moveSetup: function(e) {
+    console.log('move setup');
     var el = this.getDOMNode();
     this.createPlaceHolder(el);
 

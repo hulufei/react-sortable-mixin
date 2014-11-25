@@ -12,7 +12,11 @@ var List = React.createClass({
   mixins: [sortable.ListMixin],
   componentDidMount: function() {
     // Set items
-    this.setState({ items: ['first', 'second', 'third'] });
+    this.setState({ items: this.props.items });
+    this.getDOMNode().addEventListener('mousedown', this.handler);
+  },
+  handler: function() {
+    console.log('mouse down');
   },
   render: function() {
     var items = this.state.items.map(function(item) {
