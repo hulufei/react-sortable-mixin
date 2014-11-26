@@ -13,14 +13,10 @@ var List = React.createClass({
   componentDidMount: function() {
     // Set items
     this.setState({ items: this.props.items });
-    this.getDOMNode().addEventListener('mousedown', this.handler);
-  },
-  handler: function() {
-    console.log('mouse down');
   },
   render: function() {
-    var items = this.state.items.map(function(item) {
-      return <Item key={item} item={item} {...this.movableProps}/>;
+    var items = this.state.items.map(function(item, i) {
+      return <Item key={item} item={item} index={i} {...this.movableProps}/>;
     }, this);
 
     return <ul>{items}</ul>;
