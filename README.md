@@ -9,15 +9,9 @@ A mixin for React to creat a sortable List Component by drag and move.
 
 ## Usage
 
-Define a List Component use `ListMixin` contains Item Components use `ItemMixin`.
-
-List Component required state `items` to set items' data.
-
-Item Component required props:
-
-- `key`
-- `index`
-- `movableProps`
+- Define a List Component use `ListMixin` contains Item Components use `ItemMixin`.
+- List Component required state `items` to set items' data.
+- Item Component required props: `key` / `index` / `movableProps`.
 
 That's it!
 
@@ -54,3 +48,9 @@ var List = React.createClass({
 
 module.exports = List;
 ```
+
+## Hook Events (On List)
+
+- `onMoveBefore`: after `mousedown` before `mousemove`
+- `onResorted`: if items not resorted (drop at same position) will not trigger
+- `onMoveEnd`
