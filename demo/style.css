@@ -1,0 +1,14 @@
+li {
+	display: inline-block;
+	width: 200px;
+	height: 200px;
+	margin: 10px;
+	padding: 10px;
+	border-radius: 5px;
+	background: #0e74af;
+	color: #FFF;
+	cursor: pointer;
+}
+li:hover {
+	background: #0e74a0;
+}
