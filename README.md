@@ -1,7 +1,8 @@
 react-sortable-mixin
 ====================
 
-A mixin for React to creat a sortable List Component by drag and move.
+A mixin for React to creat a sortable(drag and move) List Component.
+[Demo](http://hulufei.github.io/react-sortable-mixin/demo/)
 
 ## Install
 
@@ -11,7 +12,8 @@ A mixin for React to creat a sortable List Component by drag and move.
 
 - Define a List Component use `ListMixin` contains Item Components use `ItemMixin`.
 - List Component required state `items` to set items' data.
-- Item Component required props: `key` / `index` / `movableProps`.
+- Item Component required props:
+  [`key`](http://facebook.github.io/react/docs/reconciliation.html) / `index` / [`movableProps`](http://facebook.github.io/react/docs/transferring-props.html).
 
 That's it!
 
