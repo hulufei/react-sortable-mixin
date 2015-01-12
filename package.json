@@ -1,6 +1,6 @@
 {
   "name": "react-sortable-mixin",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Make list like component sortable",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,8 @@
     "list",
     "mixin",
     "drag",
-    "move"
+    "move",
+    "react-component"
   ],
   "author": "hulufei",
   "license": "MIT",
