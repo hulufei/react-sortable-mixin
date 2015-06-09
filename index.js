@@ -14,6 +14,7 @@ var listMixin = {
   // movedComponent: component to move
   // moveElemEvent: mouse event object triggered on moveElem
   bindMove: function(movedComponent, moveElemEvent) {
+    //Add options to work without compulsary state "items" condition
     var moveElem = movedComponent.getDOMNode()
       , placeholder = movedComponent.placeholder
       , parentPosition = moveElem.parentElement.getBoundingClientRect()
@@ -128,6 +129,7 @@ var listMixin = {
 
 var itemMixin = {
   componentDidMount: function() {
+    //Need to add handler for drag init
     this.getDOMNode().addEventListener('mousedown', this.moveSetup);
     this.setMovable(true);
   },
