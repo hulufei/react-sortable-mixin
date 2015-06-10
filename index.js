@@ -1,3 +1,13 @@
+/*
+Change log:
+  1. Added handler for drag init (Partially done)
+  2. Removed "items" key name dependancy,
+  (DONE: now if you are not providint items array, you can add onGetItems call back to return your array to be sorted)
+  3. Add container bounds for drag
+  4. onResort method now gets three values: items, oldPosition, newPosition
+  5. Add touch event handlers (DONE)
+  6. Updating state moved to List component (DONE)
+*/
 var listMixin = {
   getInitialState: function() {
     return {items: this.props.list || []};
@@ -11,6 +21,14 @@ var listMixin = {
       resort: this.resort
     };
   },
+  getClientForEvent(e, key){
+      if(e.type.search('touch') > -1){
+        e.preventDefault();
+        return e.touches[0][key];
+      }else{
+        return e[key];
+      }
+  },
   // movedComponent: component to move
   // moveElemEvent: mouse event object triggered on moveElem
   bindMove: function(movedComponent, moveElemEvent) {
@@ -21,8 +39,10 @@ var listMixin = {
       , moveElemPosition = moveElem.getBoundingClientRect()
       , viewport = document.body.getBoundingClientRect()
       , maxOffset = viewport.right - parentPosition.left - moveElemPosition.width
-      , offsetX = moveElemEvent.clientX - moveElemPosition.left
-      , offsetY = moveElemEvent.clientY - moveElemPosition.top;
+      // , offsetX = moveElemEvent.clientX - moveElemPosition.left
+      // , offsetY = moveElemEvent.clientY - moveElemPosition.top;
+      , offsetX = this.getClientForEvent( moveElemEvent, 'clientX') - moveElemPosition.left
+      , offsetY = this.getClientForEvent( moveElemEvent, 'clientY') - moveElemPosition.top;
 
     // (Keep width) currently manually set in `onMoveBefore` if necessary,
     // due to unexpected css box model
@@ -40,8 +60,11 @@ var listMixin = {
     }
 
     this.moveHandler = function(e) {
-      var left = e.clientX - parentPosition.left - offsetX
-        , top = e.clientY - parentPosition.top - offsetY
+      console.log('Move handler on touch/click');
+      var clientX = this.getClientForEvent(e, 'clientX')
+        , clientY = this.getClientForEvent(e, 'clientY')
+        , left = clientX - parentPosition.left - offsetX
+        , top = clientY - parentPosition.top - offsetY
         , siblings
         , sibling
         , compareRect
@@ -58,10 +81,10 @@ var listMixin = {
         if (sibling !== this.intersectItem &&
             sibling !== moveElem) {
           compareRect = sibling.getBoundingClientRect();
-          if (e.clientX > compareRect.left &&
-              e.clientX < compareRect.right &&
-              e.clientY > compareRect.top &&
-              e.clientY < compareRect.bottom) {
+          if (clientX > compareRect.left &&
+              clientX < compareRect.right &&
+              clientY > compareRect.top &&
+              clientY < compareRect.bottom) {
             if (sibling !== placeholder) {
               movedComponent.insertPlaceHolder(sibling);
             }
@@ -75,6 +98,7 @@ var listMixin = {
 
     // Stop move
     this.mouseupHandler = function() {
+      console.log('Mouse up on touch/click');
       var el = moveElem
         , parentElem = el.parentElement
         , children = parentElem.children
@@ -99,13 +123,17 @@ var listMixin = {
     // > A new function reference is created after .bind() is called!
     if (movedComponent.movable) {
       this.getDOMNode().addEventListener('mousemove', this.moveHandler);
+      this.getDOMNode().addEventListener('touchmove', this.moveHandler);
     }
     // Bind to `document` to be more robust
     document.addEventListener('mouseup', this.mouseupHandler);
+    document.addEventListener('touchend', this.mouseupHandler);
   },
   unbindMove: function() {
     this.getDOMNode().removeEventListener('mousemove', this.moveHandler);
     document.removeEventListener('mouseup', this.mouseupHandler);
+    this.getDOMNode().removeEventListener('touchmove', this.moveHandler);
+    document.removeEventListener('touchend', this.mouseupHandler);
     this.intersectItem = null;
     if (this.onMoveEnd) {
       this.onMoveEnd();
@@ -114,14 +142,17 @@ var listMixin = {
   resort: function(oldPosition, newPosition) {
     var items, movedItem;
     if (oldPosition !== newPosition) {
-      items = this.state.items;
+      if(this.onGetItems)
+        items = this.onGetItems();
+      else
+        items = this.state.items;
       // First: remove item from old position
       movedItem = items.splice(oldPosition, 1)[0];
       // Then add to new position
       items.splice(newPosition, 0, movedItem);
-      this.setState({'items': items});
+//      this.setState({'items': items});
       if (this.onResorted) {
-        this.onResorted(items);
+        this.onResorted(items, oldPosition, newPosition);
       }
     }
   }
@@ -130,7 +161,9 @@ var listMixin = {
 var itemMixin = {
   componentDidMount: function() {
     //Need to add handler for drag init
-    this.getDOMNode().addEventListener('mousedown', this.moveSetup);
+    // if()
+    // this.getDOMNode().addEventListener('mousedown', this.moveSetup);
+
     this.setMovable(true);
   },
   insertPlaceHolder: function(el) {
@@ -148,6 +181,7 @@ var itemMixin = {
     this.placeholder.style.opacity = '0';
   },
   moveSetup: function(e) {
+    console.log('Mouse setup on touch/click');
     var el = this.getDOMNode();
     this.createPlaceHolder(el);
 
