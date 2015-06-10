@@ -61,7 +61,6 @@ var listMixin = {
     }
 
     this.moveHandler = function(e) {
-      console.log('Move handler on touch/click');
       var clientX = this.getClientForEvent(e, 'clientX')
         , clientY = this.getClientForEvent(e, 'clientY')
         , left = clientX - parentPosition.left - offsetX
@@ -99,7 +98,6 @@ var listMixin = {
 
     // Stop move
     this.mouseupHandler = function() {
-      console.log('Mouse up on touch/click');
       var el = moveElem
         , parentElem = el.parentElement
         , children = parentElem.children
@@ -182,7 +180,6 @@ var itemMixin = {
     this.placeholder.style.opacity = '0';
   },
   moveSetup: function(e) {
-    console.log('Mouse setup on touch/click');
     var el = this.getDOMNode();
     this.createPlaceHolder(el);
 
