@@ -11,9 +11,11 @@ A mixin for React to creat a sortable(drag and move) List Component.
 ## Usage
 
 - Define a List Component use `ListMixin` contains Item Components use `ItemMixin`.
-- List Component required state `items` to set items' data.
+- List Component required state `items` to set items' data or implement method "onGetItems" which will return array to be used for sorting
+- List Component must implemtn "onResort" method which should update state of list compoenent as per requirement. NOTE: State is now not updated implicitly, so if onResort does not update state, list will go back to original state on darg end.
 - Item Component required props:
   [`key`](http://facebook.github.io/react/docs/reconciliation.html) / `index` / [`movableProps`](http://facebook.github.io/react/docs/transferring-props.html).
+- Item component should have handler element which has following properties: onMouseDown={this.moveSetup} onTouchStart={this.moveSetup} 
 
 That's it!
 
@@ -27,7 +29,7 @@ var sortable = require('react-sortable-mixin');
 var Item = React.createClass({
   mixins: [sortable.ItemMixin],
   render: function() {
-    return <li>item {this.props.item}</li>;
+    return <li><span onMouseDown={this.moveSetup} onTouchStart={this.moveSetup} >Move</span> item {this.props.item}</li>;
   }
 });
 
@@ -45,6 +47,9 @@ var List = React.createClass({
     }, this);
 
     return <ul>{items}</ul>;
+  },
+  onResort: function(items, oldposition, newposition){
+    this.setState({ items: items });
   }
 });
 
