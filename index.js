@@ -206,10 +206,8 @@ var itemMixin = {
   },
   moveSetup: function(e) {
     if(this.props.handle && !selectorTest(e.target, this.props.handle)){
-      console.debug('RETURNING');
       return;
     }
-    console.debug("CONTINUED");
     var el = this.getDOMNode();
     this.createPlaceHolder(el);
 
