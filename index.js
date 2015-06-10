@@ -1,6 +1,6 @@
 /*
 Change log:
-  1. Added handler for drag init (Partially done)
+  1. Added handler for drag init (Done)
   2. Removed "items" key name dependancy,
   (DONE: now if you are not providint items array, you can add onGetItems call back to return your array to be sorted)
   3. Add container bounds for drag
@@ -9,6 +9,32 @@ Change log:
   6. Updating state moved to List component (DONE)
   7. Need to fix two issues created on main repo
 */
+
+/* UTIL FUNCTIONS */
+// @credits https://gist.github.com/rogozhnikoff/a43cfed27c41e4e68cdc
+function findInArray(array, callback) {
+  for (var i = 0, length = array.length; i < length; i++) {
+    if (callback.apply(callback, [array[i], i, array])) return array[i];
+  }
+}
+
+function isFunction(func) {
+return typeof func === 'function' || Object.prototype.toString.call(func) === '[object Function]';
+}
+
+function selectorTest(el, selector) {
+  var matchesSelectorFunc = findInArray([
+      'matches',
+      'webkitMatchesSelector',
+      'mozMatchesSelector',
+      'msMatchesSelector',
+      'oMatchesSelector'
+    ], function(method){
+      return isFunction(el[method]);
+    });
+  return el[matchesSelectorFunc].call(el, selector);
+}
+
 var listMixin = {
   getInitialState: function() {
     return {items: this.props.list || []};
@@ -161,8 +187,7 @@ var itemMixin = {
   componentDidMount: function() {
     //Need to add handler for drag init
     // if()
-    // this.getDOMNode().addEventListener('mousedown', this.moveSetup);
-
+    this.getDOMNode().addEventListener('mousedown', this.moveSetup);
     this.setMovable(true);
   },
   insertPlaceHolder: function(el) {
@@ -180,6 +205,11 @@ var itemMixin = {
     this.placeholder.style.opacity = '0';
   },
   moveSetup: function(e) {
+    if(this.props.handle && !selectorTest(e.target, this.props.handle)){
+      console.debug('RETURNING');
+      return;
+    }
+    console.debug("CONTINUED");
     var el = this.getDOMNode();
     this.createPlaceHolder(el);
 
