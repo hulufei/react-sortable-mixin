@@ -7,6 +7,7 @@ Change log:
   4. onResort method now gets three values: items, oldPosition, newPosition
   5. Add touch event handlers (DONE)
   6. Updating state moved to List component (DONE)
+  7. Need to fix two issues created on main repo
 */
 var listMixin = {
   getInitialState: function() {
@@ -21,7 +22,7 @@ var listMixin = {
       resort: this.resort
     };
   },
-  getClientForEvent(e, key){
+  getClientForEvent: function(e, key){
       if(e.type.search('touch') > -1){
         e.preventDefault();
         return e.touches[0][key];
