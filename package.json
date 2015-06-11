@@ -1,6 +1,6 @@
 {
   "name": "react-sortable-mixin2",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Make list like component sortable",
   "main": "index.js",
   "scripts": {
