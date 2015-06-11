@@ -185,9 +185,8 @@ var listMixin = {
 
 var itemMixin = {
   componentDidMount: function() {
-    //Need to add handler for drag init
-    // if()
     this.getDOMNode().addEventListener('mousedown', this.moveSetup);
+    this.getDOMNode().addEventListener('touchstart', this.moveSetup);
     this.setMovable(true);
   },
   insertPlaceHolder: function(el) {
