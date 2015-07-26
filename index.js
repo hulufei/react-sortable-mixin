@@ -19,34 +19,35 @@ function findInArray(array, callback) {
 }
 
 function isFunction(func) {
-return typeof func === 'function' || Object.prototype.toString.call(func) === '[object Function]';
+  return typeof func === 'function' || Object.prototype.toString.call(func) === '[object Function]';
 }
 
 function selectorTest(el, selector) {
-  var matchesSelectorFunc = findInArray([
-      'matches',
-      'webkitMatchesSelector',
-      'mozMatchesSelector',
-      'msMatchesSelector',
-      'oMatchesSelector'
-    ], function(method){
-      return isFunction(el[method]);
-    });
-  return el[matchesSelectorFunc].call(el, selector);
+  return Array.prototype.indexOf.call(el.classList, selector) > -1;
+}
+
+function closest(el, fn, self) {
+  return el && (fn.call(self, el) ? el : closest(el.parentNode, fn, self));
 }
 
 var listMixin = {
+  movableElements: {},
+
   getInitialState: function() {
-    return {items: this.props.list || []};
+    return {
+      items: this.props.list || []
+     };
   },
   componentWillMount: function() {
     // Set movable props
     // This should transfer to `ItemComponent` in `ListComponent`
     this.movableProps = {
-      bindMove: this.bindMove,
-      unbindMove: this.unbindMove,
-      resort: this.resort
+      register: this.register
     };
+  },
+  componentDidMount: function () {
+    this.getDOMNode().addEventListener('mousedown', this.moveSetup);
+    this.getDOMNode().addEventListener('touchstart', this.moveSetup);
   },
   getClientForEvent: function(e, key){
       if(e.type.search('touch') > -1){
@@ -56,30 +57,41 @@ var listMixin = {
         return e[key];
       }
   },
+  register: function (child) {
+    this.movableElements[child._reactInternalInstance._rootNodeID] = true;
+  },
   // movedComponent: component to move
   // moveElemEvent: mouse event object triggered on moveElem
-  bindMove: function(movedComponent, moveElemEvent) {
+  bindMove: function(movedComponent, moveElement, moveElemEvent) {
     //Add options to work without compulsary state "items" condition
-    var moveElem = movedComponent.getDOMNode()
+    var moveElem = moveElement
       , placeholder = movedComponent.placeholder
       , parentPosition = moveElem.parentElement.getBoundingClientRect()
+      , oldIndex = Array.prototype.indexOf.call(moveElem.parentNode.children, moveElem)
       , moveElemPosition = moveElem.getBoundingClientRect()
       , viewport = document.body.getBoundingClientRect()
       , maxOffset = viewport.right - parentPosition.left - moveElemPosition.width
       // , offsetX = moveElemEvent.clientX - moveElemPosition.left
       // , offsetY = moveElemEvent.clientY - moveElemPosition.top;
+      , limitX = this.props.sortableAxis === 'y'
+      , limitY = this.props.sortableAxis === 'x'
       , offsetX = this.getClientForEvent( moveElemEvent, 'clientX') - moveElemPosition.left
-      , offsetY = this.getClientForEvent( moveElemEvent, 'clientY') - moveElemPosition.top;
+      , offsetY = this.getClientForEvent( moveElemEvent, 'clientY') - moveElemPosition.top
+      , initialX = (moveElemPosition.left - parentPosition.left)
+      , initialY = (moveElemPosition.top - parentPosition.top);
+
+
 
     // (Keep width) currently manually set in `onMoveBefore` if necessary,
     // due to unexpected css box model
     // moveElem.style.width = moveElem.offsetWidth + 'px';
-    moveElem.parentElement.style.position = 'relative';
+    moveElem.parentNode.style.position = 'relative';
+
     moveElem.style.position = 'absolute';
-    moveElem.style.zIndex = '100';
+    moveElem.style.zIndex = this.props.zIndex || '100';
     // Keep the initialized position in DOM
-    moveElem.style.left = (moveElemPosition.left - parentPosition.left) + 'px';
-    moveElem.style.top = (moveElemPosition.top - parentPosition.top) + 'px';
+    moveElem.style.left = initialX + 'px';
+    moveElem.style.top = initialY + 'px';
 
     // Place here to customize/override styles
     if (this.onMoveBefore) {
@@ -89,8 +101,8 @@ var listMixin = {
     this.moveHandler = function(e) {
       var clientX = this.getClientForEvent(e, 'clientX')
         , clientY = this.getClientForEvent(e, 'clientY')
-        , left = clientX - parentPosition.left - offsetX
-        , top = clientY - parentPosition.top - offsetY
+        , left = !limitX ? clientX - parentPosition.left - offsetX : initialX
+        , top = !limitY ? clientY - parentPosition.top - offsetY : initialY
         , siblings
         , sibling
         , compareRect
@@ -124,41 +136,42 @@ var listMixin = {
 
     // Stop move
     this.mouseupHandler = function() {
-      var el = moveElem
-        , parentElem = el.parentElement
+      var parentElem = moveElem.parentElement
         , children = parentElem.children
         , newIndex, elIndex;
 
       newIndex = Array.prototype.indexOf.call(children, placeholder);
-      elIndex = Array.prototype.indexOf.call(children, el);
+      elIndex = Array.prototype.indexOf.call(children, moveElem);
+
       // Subtract self
       if (newIndex > elIndex) {
         newIndex -= 1;
       }
 
       // Clean DOM
-      el.removeAttribute('style');
       parentElem.removeChild(placeholder);
+      this.cleanDraggable(moveElem);
 
       this.unbindMove();
-      this.resort(movedComponent.props.index, newIndex);
+      this.resort(oldIndex, newIndex);
     }.bind(this);
 
     // To make handler removable, DO NOT `.bind(this)` here, because
     // > A new function reference is created after .bind() is called!
-    if (movedComponent.movable) {
-      this.getDOMNode().addEventListener('mousemove', this.moveHandler);
-      this.getDOMNode().addEventListener('touchmove', this.moveHandler);
-    }
+    document.addEventListener('mousemove', this.moveHandler);
+    document.addEventListener('touchmove', this.moveHandler);
+
     // Bind to `document` to be more robust
-    document.addEventListener('mouseup', this.mouseupHandler);
-    document.addEventListener('touchend', this.mouseupHandler);
+    window.addEventListener('mouseup', this.mouseupHandler);
+    window.addEventListener('touchend', this.mouseupHandler);
   },
   unbindMove: function() {
-    this.getDOMNode().removeEventListener('mousemove', this.moveHandler);
-    document.removeEventListener('mouseup', this.mouseupHandler);
-    this.getDOMNode().removeEventListener('touchmove', this.moveHandler);
-    document.removeEventListener('touchend', this.mouseupHandler);
+    document.removeEventListener('mousemove', this.moveHandler);
+    document.removeEventListener('touchmove', this.moveHandler);
+
+    window.removeEventListener('mouseup', this.mouseupHandler);
+    window.removeEventListener('touchend', this.mouseupHandler);
+
     this.intersectItem = null;
     if (this.onMoveEnd) {
       this.onMoveEnd();
@@ -180,14 +193,46 @@ var listMixin = {
         this.onResorted(items, oldPosition, newPosition);
       }
     }
-  }
-};
+  },
+  cleanDraggable: function (el) {
+    el.removeAttribute('style');
 
-var itemMixin = {
-  componentDidMount: function() {
-    this.getDOMNode().addEventListener('mousedown', this.moveSetup);
-    this.getDOMNode().addEventListener('touchstart', this.moveSetup);
-    this.setMovable(true);
+    if (this.props.sortableDraggable) {
+      el.classList.remove(this.props.sortableDraggable);
+    }
+  },
+  createPlaceHolder: function(el) {
+    this.placeholder = el.cloneNode(true);
+
+    if (this.props.sortablePlaceholder) {
+      this.placeholder.classList.add(this.props.sortablePlaceholder);
+    }
+    else {
+      this.placeholder.style.opacity = '0';
+    }
+  },
+  moveSetup: function(e) {
+    var moveElem = closest(e.target, function (el) {
+      return !!this.movableElements[el.getAttribute('data-reactid')];
+    }, this);
+
+    var isDragHandle = !this.props.sortableHandle || selectorTest(e.target, this.props.sortableHandle);
+
+    if(!!moveElem && isDragHandle) {
+      this.createPlaceHolder(moveElem);
+      this.setUpDraggable(moveElem);
+
+      this.bindMove(this, moveElem, e);
+      this.insertPlaceHolder(moveElem);
+      this.intersectItem = null;
+      // For nested movable list
+      e.stopPropagation();
+    }
+  },
+  setUpDraggable: function (el) {
+    if (this.props.sortableDraggable) {
+      el.classList.add(this.props.sortableDraggable);
+    }
   },
   insertPlaceHolder: function(el) {
     // Move forward, insert before `el`
@@ -197,27 +242,12 @@ var itemMixin = {
       , newIndex = Array.prototype.indexOf.call(parentEl.children, this.placeholder);
     parentEl.insertBefore(this.placeholder,
                           newIndex > elIndex ? el : el.nextSibling);
-  },
-  createPlaceHolder: function(el) {
-    el = el || this.getDOMNode();
-    this.placeholder = el.cloneNode(true);
-    this.placeholder.style.opacity = '0';
-  },
-  moveSetup: function(e) {
-    if(this.props.handle && !selectorTest(e.target, this.props.handle)){
-      return;
-    }
-    var el = this.getDOMNode();
-    this.createPlaceHolder(el);
+  }
+};
 
-    this.props.bindMove(this, e);
-    this.insertPlaceHolder(el);
-    this.intersectItem = null;
-    // For nested movable list
-    e.stopPropagation();
-  },
-  setMovable: function(movable) {
-    this.movable = movable;
+var itemMixin = {
+  componentDidMount: function() {
+    this.props.register(this);
   }
 };
 
