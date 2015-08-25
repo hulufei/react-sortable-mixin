@@ -213,7 +213,8 @@ var listMixin = {
   },
   moveSetup: function(e) {
     var moveElem = closest(e.target, function (el) {
-      return !!this.movableElements[el.getAttribute('data-reactid')];
+      var isValid = el && el !== document;
+      return isValid && !!this.movableElements[el.getAttribute('data-reactid')];
     }, this);
 
     var isDragHandle = !this.props.sortableHandle || selectorTest(e.target, this.props.sortableHandle);
