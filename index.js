@@ -1,3 +1,4 @@
+var ReactDOM =  require("react-dom");
 var listMixin = {
   getInitialState: function() {
     return {items: this.props.list || []};
@@ -14,14 +15,14 @@ var listMixin = {
   // movedComponent: component to move
   // moveElemEvent: mouse event object triggered on moveElem
   bindMove: function(movedComponent, moveElemEvent) {
-    var moveElem = movedComponent.getDOMNode()
-      , placeholder = movedComponent.placeholder
-      , parentPosition = moveElem.parentElement.getBoundingClientRect()
-      , moveElemPosition = moveElem.getBoundingClientRect()
-      , viewport = document.body.getBoundingClientRect()
-      , maxOffset = viewport.right - parentPosition.left - moveElemPosition.width
-      , offsetX = moveElemEvent.clientX - moveElemPosition.left
-      , offsetY = moveElemEvent.clientY - moveElemPosition.top;
+    var moveElem = ReactDOM.findDOMNode(movedComponent)
+    , placeholder = movedComponent.placeholder
+    , parentPosition = moveElem.parentElement.getBoundingClientRect()
+    , moveElemPosition = moveElem.getBoundingClientRect()
+    , viewport = document.body.getBoundingClientRect()
+    , maxOffset = viewport.right - parentPosition.left - moveElemPosition.width
+    , offsetX = moveElemEvent.clientX - moveElemPosition.left
+    , offsetY = moveElemEvent.clientY - moveElemPosition.top;
 
     // (Keep width) currently manually set in `onMoveBefore` if necessary,
     // due to unexpected css box model
@@ -40,11 +41,11 @@ var listMixin = {
 
     this.moveHandler = function(e) {
       var left = e.clientX - parentPosition.left - offsetX
-        , top = e.clientY - parentPosition.top - offsetY
-        , siblings
-        , sibling
-        , compareRect
-        , i, len;
+      , top = e.clientY - parentPosition.top - offsetY
+      , siblings
+      , sibling
+      , compareRect
+      , i, len;
       if (left > maxOffset) {
         left = maxOffset;
       }
@@ -75,9 +76,9 @@ var listMixin = {
     // Stop move
     this.mouseupHandler = function() {
       var el = moveElem
-        , parentElem = el.parentElement
-        , children = parentElem.children
-        , newIndex, elIndex;
+      , parentElem = el.parentElement
+      , children = parentElem.children
+      , newIndex, elIndex;
 
       newIndex = Array.prototype.indexOf.call(children, placeholder);
       elIndex = Array.prototype.indexOf.call(children, el);
@@ -97,13 +98,13 @@ var listMixin = {
     // To make handler removable, DO NOT `.bind(this)` here, because
     // > A new function reference is created after .bind() is called!
     if (movedComponent.movable) {
-      this.getDOMNode().addEventListener('mousemove', this.moveHandler);
+      ReactDOM.findDOMNode(this).addEventListener('mousemove', this.moveHandler);
     }
     // Bind to `document` to be more robust
     document.addEventListener('mouseup', this.mouseupHandler);
   },
   unbindMove: function() {
-    this.getDOMNode().removeEventListener('mousemove', this.moveHandler);
+    ReactDOM.findDOMNode(this).removeEventListener('mousemove', this.moveHandler);
     document.removeEventListener('mouseup', this.mouseupHandler);
     this.intersectItem = null;
     if (this.onMoveEnd) {
@@ -128,25 +129,25 @@ var listMixin = {
 
 var itemMixin = {
   componentDidMount: function() {
-    this.getDOMNode().addEventListener('mousedown', this.moveSetup);
+    ReactDOM.findDOMNode(this).addEventListener('mousedown', this.moveSetup);
     this.setMovable(true);
   },
   insertPlaceHolder: function(el) {
     // Move forward, insert before `el`
     // Move afterward, insert after `el`
     var parentEl = el.parentElement
-      , elIndex = Array.prototype.indexOf.call(parentEl.children, el)
-      , newIndex = Array.prototype.indexOf.call(parentEl.children, this.placeholder);
+    , elIndex = Array.prototype.indexOf.call(parentEl.children, el)
+    , newIndex = Array.prototype.indexOf.call(parentEl.children, this.placeholder);
     parentEl.insertBefore(this.placeholder,
                           newIndex > elIndex ? el : el.nextSibling);
   },
   createPlaceHolder: function(el) {
-    el = el || this.getDOMNode();
+    el = el || ReactDOM.findDOMNode(this);
     this.placeholder = el.cloneNode(true);
     this.placeholder.style.opacity = '0';
   },
   moveSetup: function(e) {
-    var el = this.getDOMNode();
+    var el = ReactDOM.findDOMNode(this);
     this.createPlaceHolder(el);
 
     this.props.bindMove(this, e);
